@@ -5,10 +5,12 @@ let isMouseDown = false;
 
 // Total number of circles (28 columns x 14 rows = 392 circles)
 const totalCircles = 28 * 14;
+const circlesArray = [];
 
 // Function to toggle circle color
 function toggleCircleColor(circle) {
     circle.classList.toggle('active');
+    logActiveCircles(); // Call this function whenever a circle is toggled
 }
 
 // Loop to create the circles
@@ -16,7 +18,8 @@ for (let i = 0; i < totalCircles; i++) {
     // Create a new div element for each circle
     const circle = document.createElement('div');
     circle.classList.add('circle');
-    
+    circlesArray.push(circle); // Store each circle in the array
+
     // Add click event listener to toggle color
     circle.addEventListener('click', function() {
         toggleCircleColor(circle);
@@ -44,6 +47,38 @@ document.addEventListener('mousedown', function(event) {
 document.addEventListener('mouseup', function() {
     isMouseDown = false;
 });
+
+// Function to log active circles in the desired format
+function logActiveCircles() {
+    let activeCircles = [];
+    let row, col, count;
+
+    // Loop through each row and column to find active circles
+    for (let r = 0; r < 14; r++) {
+        col = 0;  // Reset column for each row
+        while (col < 28) {
+            if (circlesArray[r * 28 + col].classList.contains('active')) {
+                // Found an active circle, now count consecutive active circles
+                count = 1;
+                let startCol = col;
+
+                while (col + 1 < 28 && circlesArray[r * 28 + (col + 1)].classList.contains('active')) {
+                    count++;
+                    col++;
+                }
+
+                // Log the starting position, row, count of active circles, and 1
+                activeCircles.push(`virtualDisplay.rect(${startCol},${r},${count},1);`);
+
+                // Move to the next column after the consecutive block
+            }
+            col++;
+        }
+    }
+
+    // Log the results to the console
+    console.log(activeCircles.join(' | '));
+}
 
 // Function to download the artwork as a JPEG
 downloadBtn.addEventListener('click', function() {
@@ -76,3 +111,4 @@ downloadBtn.addEventListener('click', function() {
     link.download = 'artwork.jpg';
     link.click();
 });
+
