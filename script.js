@@ -1,7 +1,9 @@
 // Get the grid container and the download button
 const grid = document.getElementById('circleGrid');
 const downloadBtn = document.getElementById('downloadBtn');
+const invertBtn = document.getElementById('invertBtn');
 let isMouseDown = false;
+let isInverted = false; // Track if the colors are inverted
 
 // Total number of circles (28 columns x 14 rows = 392 circles)
 const totalCircles = 28 * 14;
@@ -10,7 +12,17 @@ const circlesArray = [];
 // Function to toggle circle color
 function toggleCircleColor(circle) {
     circle.classList.toggle('active');
-    logActiveCircles(); // Call this function whenever a circle is toggled
+    updateCircleColor(circle); // Ensure the circle color is updated based on the current state
+    logActiveCircles(); // Log active circles
+}
+
+// Function to update the color of a circle based on its state (active/inactive) and whether the colors are inverted
+function updateCircleColor(circle) {
+    if (circle.classList.contains('active')) {
+        circle.style.backgroundColor = isInverted ? '#191919' : 'white';
+    } else {
+        circle.style.backgroundColor = isInverted ? 'white' : '#191919';
+    }
 }
 
 // Loop to create the circles
@@ -31,7 +43,7 @@ for (let i = 0; i < totalCircles; i++) {
             toggleCircleColor(circle);
         }
     });
-    
+
     // Append the circle to the grid container
     grid.appendChild(circle);
 }
@@ -39,7 +51,7 @@ for (let i = 0; i < totalCircles; i++) {
 // Event listeners to track mouse down and up states
 document.addEventListener('mousedown', function(event) {
     // Prevent interaction if the download button is clicked
-    if (!downloadBtn.contains(event.target)) {
+    if (!downloadBtn.contains(event.target) && !invertBtn.contains(event.target)) {
         isMouseDown = true;
     }
 });
@@ -101,7 +113,7 @@ downloadBtn.addEventListener('click', function() {
         const y = row * (35.6 + 1.2);
         ctx.beginPath();
         ctx.arc(x + 17.8, y + 17.8, 17.8, 0, 2 * Math.PI);
-        ctx.fillStyle = circle.classList.contains('active') ? 'white' : '#191919';
+        ctx.fillStyle = circle.classList.contains('active') ? (isInverted ? '#191919' : 'white') : (isInverted ? 'white' : '#191919');
         ctx.fill();
     });
 
@@ -112,4 +124,12 @@ downloadBtn.addEventListener('click', function() {
     link.click();
 });
 
+// Invert colors function
+invertBtn.addEventListener('click', function() {
+    isInverted = !isInverted; // Toggle the inverted state
 
+    // Loop through each circle and update the color
+    circlesArray.forEach(circle => {
+        updateCircleColor(circle); // Update each circle color based on the inverted state
+    });
+});
